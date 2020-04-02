@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container" id="main">
+
+        <form v-on:submit.prevent="postLibro">
+            <div class="card mb-auto">
+                <div aria-controls="libroForm" aria-expanded="false" class="card-header" data-target="#libroForm"
+                    data-toggle="collapse" style="cursor: pointer">
+                    <div class="float-left">New/Edit User</div>
+                    <div class="float-right">+</div>
+                </div>
+                <div class="card card-body collapse" id="libroForm">
+                    <div class="form-group row">
+                        <label for="nombre" class="col-sm-4 col-form-label">Nombre</label>
+                        <input id="libroId" type="hidden" v-model="libro_id">
+                        <input class="form-control col-sm-8" id="nombre" placeholder="nombre" type="text"
+                            v-model="libro_nombre" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="titulo" class="col col-sm-4">Titulo</label>
+                        <input class="form-control col-sm-8" id="titulo" placeholder="titulo" type="text"
+                            v-model="libro_titulo" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="nombreAutor" class="col col-sm-4">nombreAutor</label>
+                        <input class="form-control col-sm-8" id="nombreAutor" placeholder="nombreAutor" type="text"
+                            v-model="libro_nombreAutor" />
+                    </div>
+                    <div class="form-group row">
+                        <div class="col col-sm-4"></div>
+                        <input class="btn btn-primary col col-sm-8" type="submit" value="Save">
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <br><br>
+
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>nombre</th>
+                    <th>titulo</th>
+                    <th>nombre autor</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="libro in libros">
+                    <td>{{ libro.id }}</td>
+                    <td>{{ libro.nombre }}</td>
+                    <td>{{ libro.titulo }}</td>
+                    <td>{{ libro.nombreAutor }}</td>
+                    <td>
+                        <button class="btn btn-primary" v-on:click="editLibro(libro)">Edit</button>
+                        <button class="btn btn-danger" v-on:click="deleteLibro(libro)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Vue.js imports -->
+    <script src="webjars/vue/vue.min.js"></script>
+    <script src="webjars/axios/dist/axios.min.js"></script>
+    <!-- Actual Vue.js script -->
+
+    <script>
+        var app = new Vue({
+            el: '#main',
+            data() {
+                return {
+                    libro_id: '',
+                    libro_nombre: '',
+                    libro_titulo: '',
+                    libro_nombreAutor: '',
+                    libros: null,
+                }
+            },
+            mounted() {
+                this.getLibros();
+            },
+            methods: {
+                getLibros: async function () {
+                    response=await axios
+                        .get("/api/libros");
+                        this.libros=response.data;
+                }
+                , postLibro: async function () {
+                    await axios
+                            .post("/api/libros", {
+                                "id": this.libro_id,
+                                "nombre": this.libro_nombre,
+                                "titulo": this.libro_titulo,
+                                "nombreAutor": this.libro_nombreAutor,
+                            })
+                                this.libro_nombre = '';
+                                this.libro_titulo = '';
+                                this.libro_id = '';
+                                this.libro_nombreAutor = '';
+                            this.getLibros();
+                },
+                deleteLibro: async function (libro) {
+                    await axios
+                        .delete("/api/libros/" + libro.id);
+                    this.getLibros();
+                },
+                editLibro:function (libro) {
+                    this.libro_id = libro.id;
+                    document.getElementById('libroForm')
+                        .setAttribute("class", document.getElementById('libroForm').getAttribute("class") + " show");
+
+                }
+            },
+        })
+    </script>
+
+    </div>
+
+
+</body>
+
+</html>
